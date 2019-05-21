@@ -1,8 +1,14 @@
+// -----------------------------------
+// home functions
+// -----------------------------------
+
+
 //Scrape
-$(document).on("click", ".scrapebutton", function () {
-  $.ajax({
+$(document).on("click", ".scrape-new", function () {
+  
+    $.ajax({
       method: "GET",
-      url: "/scrape",
+      url: "/api/fetch",
   })
       .done(function (data) {
           window.location = "/"
@@ -10,22 +16,46 @@ $(document).on("click", ".scrapebutton", function () {
 });
 
 //Save articles
-$(document).on("click", ".saveButton", function () {
-  var savedArticleId = $(this).attr("data-id");
-  $.ajax({
-      method: "POST",
-      url: "/api/savearticle/" + savedArticleId,
-  })
-      .done(function (data) {
-          window.location = "/"
-      });
-});
+$(document).on("click", ".save", function () {
+//   var savedArticleId = $(this).attr("data-id");
+//   $.ajax({
+//       method: "put",
+//       url: "/api/headlines/" + savedArticleId,
+//   })
+//       .done(function (data) {
+//           window.location = "/"
+//       });
 
+var articleToSave = $(this)
+      .parents(".card")
+      .data();
+
+    // Remove card from page
+    $(this)
+      .parents(".card")
+      .remove();
+
+    articleToSave.saved = true;
+    // Using a patch method to be semantic since this is an update to an existing record in our collection
+    $.ajax({
+      method: "PUT",
+      url: "/api/headlines/" + articleToSave._id,
+      data: articleToSave
+    }).then(function(data) {
+      // If the data was saved successfully
+      if (data.saved) {
+        // Run the initPage function again. This will reload the entire list of articles
+        initPage();
+      }
+    });
+
+});
 //Delete all articles
-$(document).on("click", ".deleteAllButton", function () {
-  $.ajax({
-      method: "DELETE",
-      url: "/api/deletearticles/",
+$(document).on("click", ".clear", function () {
+  
+    $.ajax({
+      method: "GET",
+      url: "/api/clear/",
   })
       .done(function (data) {
           window.location = "/"
@@ -33,37 +63,49 @@ $(document).on("click", ".deleteAllButton", function () {
 });
 
 //Delete an article
-$(document).on("click", ".deleteButton", function () {
-  var deleteArticleId = $(this).attr("data-id");
+$(document).on("click", ".delete", function () {
+  
+    var deleteArticleId = $(this).attr("data-id");
   $.ajax({
       method: "DELETE",
-      url: "/api/deletearticle/" + deleteArticleId,
+      url: "/api/headlines/" + deleteArticleId,
   })
       .done(function (data) {
           window.location = "/"
       });
 });
 
+// -----------------------------------
+// saved functions
+// -----------------------------------
+
 //Delete a saved article
-$(document).on("click", ".deleteArticleButton", function () {
+$(document).on("click", ".delete", function () {
   var deleteSavedArticleId = $(this).attr("data-id");
 
   $.ajax({
       method: "DELETE",
-      url: "/api/deletesavearticle/" + deleteSavedArticleId,
+      url: "/api/headlines/" + deleteSavedArticleId,
   })
       .done(function (data) {
           window.location = "/saved"
       });
 });
 
-//Save a note
-$(document).on("click", ".saveNotesButton", function () {
-  var newNoteId = $(this).attr("data-id");
+// -----------------------------------
+// note functions
+// -----------------------------------
+$(document).on("click", ".show-notes", function () {
 
+});
+
+//Save a note
+$(document).on("click", ".notes", function () {
+  var newNoteId = $(this).attr("data-id");
+debugger
   $.ajax({
       method: "POST",
-      url: "/api/savenote/" + newNoteId,
+      url: "/api/notes/" + newNoteId,
       data: {
           text: $("#note" + newNoteId).val(),
           created: new Date()
